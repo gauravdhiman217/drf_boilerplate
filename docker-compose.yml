@@ -1,0 +1,45 @@
+volumes:
+  dbdata: {}
+
+services:
+  django:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    volumes:
+      - .:/app:rw
+    env_file:
+      - ./.envs/local/.django
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+  db:
+    image: "postgres:alpine"
+    env_file:
+      - ./.envs/local/.postgres
+    ports:
+      - "5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data:delegated
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+  celery:
+    build: 
+      context: .
+      dockerfile: ./backend/Dockerfile
+    command: celery -A core worker --loglevel=info
+    volumes:
+      - .:/app:rw
+    depends_on:
+      - django
+      - redis
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+
+    

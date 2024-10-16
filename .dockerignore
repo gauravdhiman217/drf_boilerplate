@@ -1,0 +1,5 @@
+.venv/
+.gitconfig
+.gitconfig.example
+.ruff_cache
+*/accounts_old/*

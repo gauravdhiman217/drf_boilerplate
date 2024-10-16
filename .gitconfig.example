@@ -1,0 +1,3 @@
+[credential "https://gitlab.example.com"]
+    username = <your_gitlab_username>
+    password = <your_token>
