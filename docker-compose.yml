@@ -1,6 +1,5 @@
 volumes:
   dbdata: {}
-
 services:
   django:
     build:
