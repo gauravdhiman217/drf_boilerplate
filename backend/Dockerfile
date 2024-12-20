@@ -5,7 +5,7 @@ ENV PYTHONFAULTHANDLER=1 \
   PIP_NO_CACHE_DIR=off \
   PIP_DISABLE_PIP_VERSION_CHECK=on \
   PIP_DEFAULT_TIMEOUT=100 \
-  POETRY_VERSION=1.8.3
+  POETRY_VERSION=1.8.4
 RUN groupadd user && useradd --create-home --home-dir /home/user -g user user
 # Install system dependencies
 RUN apt-get update && apt-get install python3-dev gcc build-essential libpq-dev -y
@@ -20,4 +20,4 @@ RUN poetry install --no-root --no-interaction --no-ansi
 WORKDIR /home/user/app/backend
 COPY backend/ /home/user/app/backend
 USER user
-CMD gunicorn core.wsgi --log-file - -b 0.0.0.0:8000 --reload
+CMD gunicorn core.wsgi --log-file - -b 0.0.0.0:8000 --reload --workers 4 --timeout 120 --max-requests 1000 --max-requests-jitter 50

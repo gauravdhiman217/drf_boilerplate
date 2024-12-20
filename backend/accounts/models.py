@@ -26,18 +26,6 @@ class UserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 
-class Genders(models.Model):
-    name = models.CharField(max_length=30, unique=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
-
-    class Meta:
-        verbose_name_plural = "Genders"
-
-    def __str__(self):
-        return self.name
-
-
 class Roles(models.Model):
     name = models.CharField(max_length=30, unique=True)
     description = models.CharField(max_length=255, blank=True, null=True)
@@ -61,7 +49,9 @@ class User(AbstractUser):
     age = models.IntegerField(blank=True, null=True)
     gender = models.CharField(max_length=1, choices=GENDER, null=True, blank=True)
     profile_pic = models.FileField(upload_to="profile_pic/", blank=True, null=True)
-    role = models.ForeignKey(Roles, on_delete=models.DO_NOTHING, null=True, blank=True)
+    role = models.ForeignKey(
+        Roles, on_delete=models.DO_NOTHING, null=True, blank=True, default=2
+    )
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)

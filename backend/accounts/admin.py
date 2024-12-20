@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from .models import Roles, Genders
+from .models import Roles
 
 # Register your models here.
 User = get_user_model()
@@ -24,4 +24,3 @@ class UserAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Roles)
-admin.site.register(Genders)
