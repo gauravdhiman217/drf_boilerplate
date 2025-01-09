@@ -13,6 +13,10 @@ from rest_framework.viewsets import ModelViewSet
 from django.utils import timezone
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.tokens import AccessToken
+from random import randint
+from datetime import datetime, timedelta
+from django.conf import settings
+from django.core.mail import send_mail
 
 
 class CustomTokenRefreshView(TokenRefreshView):
@@ -121,7 +125,7 @@ class SignupApiView1(APIView):
                 email=request.data.get("email"),
                 mobile_no=request.data.get("mobile_no"),
                 password=make_password(request.data.get("password")),
-                role_id=request.data.get("role_id"),
+                role=request.data.get("role_id"),
                 gender=request.data.get("gender"),
             )
             data = UserSerializer(user, context={"request": request}).data
@@ -251,3 +255,87 @@ class TestingResponse(APIView):
 class RoleView(ListAPIView):
     serializer_class = RoleSerializer
     queryset = Roles.objects.all()
+
+
+class ForgotPasswordRequestOtpView(APIView):
+    permission_classes = [permissions.AllowAny]
+    def post(self, request, *args, **kwargs):
+        email = request.data.get("email")
+        if not email:
+            return Response(
+                {"message": "Email is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        user = User.objects.filter(email=email).first()
+        if not user:
+            return Response(
+                {"message": "User with this email does not exist."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Generate OTP
+        user.otp = str(randint(1000, 9999))
+        user.otp_expires_at = datetime.now() + timedelta(minutes=30)
+        user.save()
+
+        # Send OTP via email
+        send_mail(
+            "Password Reset OTP",
+            f"Dear {user.first_name}, your OTP for password reset is {user.otp}. It is valid for 30 minutes.",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+        )
+
+        return Response(
+            {"message": "OTP has been sent to your email."},
+            status=status.HTTP_200_OK
+        )
+        
+        
+
+
+class ForgotPasswordVerifyOtpView(APIView):
+    permission_classes = [permissions.AllowAny]
+    def post(self, request, *args, **kwargs):
+        email = request.data.get("email")
+        otp = request.data.get("otp")
+        new_password = request.data.get("new_password") 
+
+        if not email or not otp:
+            return Response(
+                {"message": "Email and OTP are required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user = User.objects.filter(email=email).first()
+        if not user:
+            return Response(
+                {"message": "User with this email does not exist."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        if user.otp != otp:
+            return Response(
+                {"message": "Invalid OTP."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        if user.otp_expires_at < timezone.now():
+            return Response(
+                {"message": "OTP has expired."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        if new_password:
+           
+            user.password = make_password(new_password)
+            user.otp = None 
+            user.otp_expires_at = None  
+            user.save()
+            return Response(
+                {"message": "Password has been reset successfully."},
+                status=status.HTTP_200_OK
+            )
+
+        return Response(
+            {"message": "OTP verified successfully. Please provide a new password."},
+            status=status.HTTP_200_OK
+        )
