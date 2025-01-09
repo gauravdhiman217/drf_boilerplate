@@ -12,9 +12,9 @@ class RoleSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(ModelSerializer):
-    role_id = serializers.PrimaryKeyRelatedField(
-        queryset=Roles.objects.all(), source="role", write_only=True, required=False
-    )
+    # role_id = serializers.PrimaryKeyRelatedField(
+    #     queryset=Roles.objects.all(), source="role", write_only=True, required=False
+    # )
     role = serializers.StringRelatedField(read_only=True)
     gender = serializers.ChoiceField(choices=GENDER)
 
@@ -31,7 +31,6 @@ class UserSerializer(ModelSerializer):
             "gender",
             "profile_pic",
             "role",
-            "role_id",
             "is_active",
             "is_staff",
             "created_at",

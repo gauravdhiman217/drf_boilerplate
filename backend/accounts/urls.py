@@ -5,9 +5,10 @@ from .views import (
     TestingResponse,
     RoleView,
     CustomTokenRefreshView,
+    ForgotPasswordRequestOtpView,
+    ForgotPasswordVerifyOtpView
 )
 
-# from .web_views import *
 from django.urls import path, include
 from django.contrib import admin
 from rest_framework_simplejwt.views import (
@@ -31,4 +32,6 @@ urlpatterns = [
     path("check/", TestingResponse.as_view(), name="testing"),
     path("verify/", TokenVerifyView.as_view(), name="verify"),
     path("role/", RoleView.as_view(), name="RoleView"),
+    path('forgot-password/request-otp/', ForgotPasswordRequestOtpView.as_view(), name='forgot_password_request_otp'),
+    path('forgot-password/verify-otp/', ForgotPasswordVerifyOtpView.as_view(), name='forgot_password_verify_otp'),
 ]
