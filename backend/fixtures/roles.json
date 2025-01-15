@@ -1,0 +1,18 @@
+[
+    {
+        "model": "accounts.roles",
+        "pk": 1,
+        "fields": {
+            "name": "Admin",
+            "description": "Administrator role with full access"
+        }
+    },
+    {
+        "model": "accounts.roles",
+        "pk": 2,
+        "fields": {
+            "name": "User",
+            "description": "User role with limited access"
+        }
+    }
+]

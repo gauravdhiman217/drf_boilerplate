@@ -2,9 +2,11 @@ volumes:
   dbdata: {}
 services:
   django:
+    &django
     build:
       context: .
       dockerfile: ./backend/Dockerfile
+    image: project
     volumes:
       - .:/app:rw
     env_file:
@@ -27,15 +29,17 @@ services:
     ports:
       - 8080:8080
   celery:
-    build: 
-      context: .
-      dockerfile: ./backend/Dockerfile
+    <<: *django
     command: celery -A core worker --loglevel=info
     volumes:
       - .:/app:rw
     depends_on:
       - django
       - redis
+    ports:
+      - 8889
+    entrypoint: []
+    
   redis:
     image: "redis:alpine"
     ports:
