@@ -10,11 +10,11 @@ python manage.py migrate
 echo "Populating Roles..."
 python manage.py loaddata fixtures/roles.json
 
-echo "Populating User Data..."
-python manage.py seed
+# echo "Populating User Data..."
+# python manage.py seed
 
-# echo "Creating Superuser..."
-# python manage.py createsuperuser --noinput 
+echo "Creating Superuser..."
+python manage.py createsuperuser --noinput 
 
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
