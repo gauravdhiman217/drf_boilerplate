@@ -27,7 +27,18 @@ services:
     image: adminer
     restart: always
     ports:
-      - 8080:8080
+      - 8000:8080
+  nginx:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile-nginx
+    restart: always
+    volumes:
+      - ./backend/static:/backend/static
+    ports:
+      - 80:80
+    depends_on:
+      - django
   celery:
     <<: *django
     command: celery -A core worker --loglevel=info
@@ -36,13 +47,12 @@ services:
     depends_on:
       - django
       - redis
-    ports:
-      - 8889
+    ports: []
+
     entrypoint: []
     
   redis:
     image: "redis:alpine"
-    ports:
-      - "6379:6379"
+    ports: []
 
     

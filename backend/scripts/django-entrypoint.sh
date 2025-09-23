@@ -1,8 +1,31 @@
-#!/bin/sh
+#!/bin/bash
 
-# Wait for the database to be ready
-echo "Waiting for the database to be ready."
-scripts/wait-script.sh db:5432 --timeout=60 -- echo "Database is ready."
+echo "Waiting for the database to be ready..."
+python <<EOF
+import time
+import psycopg2
+from psycopg2 import OperationalError
+
+db_ready = False
+while not db_ready:
+    try:
+        conn = psycopg2.connect(
+            dbname="postgres",
+            user="$POSTGRES_USER",
+            password="$POSTGRES_PASSWORD",
+            host="$DB_HOST",
+            port=int("$DB_PORT")
+        )
+        conn.close()
+        db_ready = True
+        print("Database is ready!")
+    except OperationalError:
+        print("Database is not ready. Retrying...")
+        time.sleep(2)
+EOF
+
+echo "Database is ready!"
+
 
 echo "Running Migration"
 python manage.py migrate

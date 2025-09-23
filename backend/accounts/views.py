@@ -259,21 +259,21 @@ class RoleView(ListAPIView):
 
 class ForgotPasswordRequestOtpView(APIView):
     permission_classes = [permissions.AllowAny]
+
     def post(self, request, *args, **kwargs):
         email = request.data.get("email")
         if not email:
             return Response(
-                {"message": "Email is required."},
-                status=status.HTTP_400_BAD_REQUEST
+                {"message": "Email is required."}, status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         user = User.objects.filter(email=email).first()
         if not user:
             return Response(
                 {"message": "User with this email does not exist."},
-                status=status.HTTP_404_NOT_FOUND
+                status=status.HTTP_404_NOT_FOUND,
             )
-        
+
         # Generate OTP
         user.otp = str(randint(1000, 9999))
         user.otp_expires_at = datetime.now() + timedelta(minutes=30)
@@ -288,54 +288,49 @@ class ForgotPasswordRequestOtpView(APIView):
         )
 
         return Response(
-            {"message": "OTP has been sent to your email."},
-            status=status.HTTP_200_OK
+            {"message": "OTP has been sent to your email."}, status=status.HTTP_200_OK
         )
-        
-        
 
 
 class ForgotPasswordVerifyOtpView(APIView):
     permission_classes = [permissions.AllowAny]
+
     def post(self, request, *args, **kwargs):
         email = request.data.get("email")
         otp = request.data.get("otp")
-        new_password = request.data.get("new_password") 
+        new_password = request.data.get("new_password")
 
         if not email or not otp:
             return Response(
                 {"message": "Email and OTP are required."},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         user = User.objects.filter(email=email).first()
         if not user:
             return Response(
                 {"message": "User with this email does not exist."},
-                status=status.HTTP_404_NOT_FOUND
+                status=status.HTTP_404_NOT_FOUND,
             )
         if user.otp != otp:
             return Response(
-                {"message": "Invalid OTP."},
-                status=status.HTTP_400_BAD_REQUEST
+                {"message": "Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST
             )
         if user.otp_expires_at < timezone.now():
             return Response(
-                {"message": "OTP has expired."},
-                status=status.HTTP_400_BAD_REQUEST
+                {"message": "OTP has expired."}, status=status.HTTP_400_BAD_REQUEST
             )
         if new_password:
-           
             user.password = make_password(new_password)
-            user.otp = None 
-            user.otp_expires_at = None  
+            user.otp = None
+            user.otp_expires_at = None
             user.save()
             return Response(
                 {"message": "Password has been reset successfully."},
-                status=status.HTTP_200_OK
+                status=status.HTTP_200_OK,
             )
 
         return Response(
             {"message": "OTP verified successfully. Please provide a new password."},
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )
