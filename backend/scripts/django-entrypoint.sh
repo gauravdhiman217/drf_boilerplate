@@ -27,19 +27,30 @@ EOF
 echo "Database is ready!"
 
 
-echo "Running Migration"
-python manage.py migrate
+if [ $# -eq 0 ]; then
+    echo "No arguments provided, skipping command execution."
+    echo "Running Migration"
+    python manage.py migrate
 
-echo "Populating Roles..."
-python manage.py loaddata fixtures/roles.json
+    echo "Populating Roles..."
+    python manage.py loaddata fixtures/roles.json
 
-# echo "Populating User Data..."
-# python manage.py seed
+    echo "Creating Admin User.."
+    python manage.py populate_geo_data
 
-echo "Creating Superuser..."
-python manage.py createsuperuser --noinput 
+    echo "Creating Superuser..."
+    python manage.py createsuperuser --noinput 
 
-echo "Collecting static files..."
-python manage.py collectstatic --noinput
+    echo "Collecting static files..."
+    python manage.py collectstatic --noinput
 
-exec "$@"
+    echo "Starting nginx..."
+    nginx -g "daemon off;" &
+
+    echo "Starting Gunicorn..."
+    gunicorn core.wsgi --log-file - -b 127.0.0.1:8000 --reload --workers 2 --timeout 120 --max-requests 1000 --max-requests-jitter 50
+else
+    echo "Executing command: $@"
+    exec "$@"
+fi
+ 
